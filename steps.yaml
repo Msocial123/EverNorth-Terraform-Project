@@ -1,0 +1,146 @@
+#https://aws.amazon.com/blogs/containers/exposing-kubernetes-applications-part-2-aws-load-balancer-controller/
+
+aws eks update-kubeconfig --name <CLUSTER_NAME> --profile ingressprofile 
+
+Download IAM Policy:
+curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.5.4/docs/install/iam_policy.json
+
+Create IAM policy:
+aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy \
+    --policy-document file://iam_policy.json \
+    --profile <AWS-PROFILE-NAME>
+
+Create IAM Role:
+aws iam create-role \
+    --role-name AmazonEKSLoadBalancerControllerRole \
+    --assume-role-policy-document file://"load-balancer-role-trust-policy.json" \
+    --profile <AWS-PROFILE-NAME>
+
+Attach IAM policy to the IAM role:
+aws iam attach-role-policy \
+  --policy-arn arn:aws:iam::<AWS-ACCOUNT-NO>:policy/AWSLoadBalancerControllerIAMPolicy \
+  --role-name AmazonEKSLoadBalancerControllerRole
+
+#create a service account using 7_aws_load-balancer-controller-service-account
+
+
+helm repo add eks https://aws.github.io/eks-charts    
+
+helm repo update eks
+
+helm uninstall aws-load-balancer-controller -n kube-system
+
+#installs custom resource definitions (CRDs) necessary for the controller(POD) to function:
+kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"
+
+kubectl get crd 
+
+# Delete custom resource definitions (CRDs)
+kubectl delete -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master"
+
+
+# Manifest : https://docs.aws.amazon.com/eks/latest/userguide/lbc-manifest.html
+# https://docs.aws.amazon.com/eks/latest/userguide/lbc-helm.html
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=basic-cluster-3 \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=us-east-1 \
+  --set vpcId=vpc-051a850c651799c0b
+
+
+  helm upgrade aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=basic-cluster-3 \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=us-east-1 \
+  --set vpcId=vpc-051a850c651799c0b
+
+
+  kubectl -n kube-system rollout status deployment aws-load-balancer-controller
+  
+  kubectl get deployment -n kube-system aws-load-balancer-controller
+
+
+
+# ArgoCD
+https://argo-cd.readthedocs.io/en/stable/getting_started/
+1. Install Argo CD
+kubectl create namespace argocd
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml -n argocd 
+kubectl delete -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml -n argocd 
+
+
+kubectl logs -f -l app.kubernetes.io/name=aws-load-balancer-controller -n kube-system   
+
+#Delete AWS_ALB_Controller
+#Delete Servive account
+#Delete IAM Role
+#Delete IAM Policy
+terraform destroy -target=helm_release.aws-load-balancer-controller --auto-approve
+terraform destroy -target=kubernetes_service_account.service-account --auto-approve
+terraform destroy -target=module.lb_role --auto-approve
+terraform destroy -target=aws_iam_role.AmazonEKSLoadBalancerControllerRole --auto-approve
+terraform destroy -target=aws_iam_policy.AWSLoadBalancerControllerIAMPolicy --auto-approve
+terraform destroy --auto-approve -target=aws_instance.jenkins-server
+
+
+terraform destroy -target=helm_release.aws-load-balancer-controller -target=kubernetes_service_account.service-account -target=aws_iam_role.AmazonEKSLoadBalancerControllerRole -target=aws_iam_policy.AWSLoadBalancerControllerIAMPolicy --auto-approve
+
+terraform apply -target=helm_release.aws-load-balancer-controller -target=kubernetes_service_account.service-account  --auto-approve
+terraform destroy -target=helm_release.aws-load-balancer-controller -target=kubernetes_service_account.service-account  --auto-approve
+
+
+kubectl get svc -n kube-system
+kubectl get serviceaccounts -n kube-system
+
+
+terraform destroy -target=module.rds_instance --auto-approve
+terraform destroy --auto-approve
+
+kubectl delete svc aws-load-balancer-webhook-service
+kubectl delete service aws-load-balancer-controller -n kube-system
+kubectl delete serviceaccount aws-load-balancer-controller -n kube-system
+
+
+terraform apply --auto-approve 
+terraform apply -target=module.module_name --auto-approve
+
+
+helm install training helm-eks
+helm delete training
+
+helm install RELEASE-NAME CHART-NAME
+helm delete RELEASE-NAME
+
+
+kubectl get events
+
+TODO : Fix
+DB Password issue - use plain password
+DB pool sizing
+
+Benchmarking using Apache tool : 
+Note : By default present on Mac
+ulimit -n 10000
+https://vyspiansky.github.io/2019/12/02/apache-bench-for-load-testing/
+
+
+
+## Prometheous
+kubectl get svc -n prometheus
+kubectl edit svc kube-prometheus-stackr-prometheus -n prometheus
+
+## Grafana
+kubectl get svc -n prometheus
+kubectl edit svc kube-prometheus-stackr-grafana -n prometheus
+The username is admin, and the password is prom-operator
+
+## ArgoCD
+kubectl edit service argocd-server -n argocd
+kubectl get secret -n argocd 
+kubectl edit secret argocd-initial-admin-secret -n argocd 
+echo [YOUR-ENCODED-PASSWORD]] | base64 —decode
