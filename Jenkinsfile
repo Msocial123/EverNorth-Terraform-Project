@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        MAVEN_HOME = tool 'Maven 3'
         TERRASCAN = '/usr/local/bin/terrascan'
         TFSEC = '/usr/local/bin/tfsec'
     }
