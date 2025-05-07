@@ -1,7 +1,7 @@
 #!/bin/bash
 
-rmdir reports
-rmdir logfile
+rm -rf reports
+rm -rf logfile
 mkdir -p reports
 mkdir -p logfile
 
