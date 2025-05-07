@@ -6,7 +6,7 @@ mkdir -p reports
 /usr/local/bin/terrascan scan -t aws -d . -o text > reports/terrascan_report.txt
 
 #Running the TFsec scan
-/usr/local/bin/tfsec . --format text > reports/tfsec_report.txt
+/usr/local/bin/tfsec . --no-cache --format text > reports/tfsec_report.txt
 
 echo "Terrascan and tfsec reports saved to $(pwd)/reports/"
 
