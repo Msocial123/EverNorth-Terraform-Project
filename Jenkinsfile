@@ -5,9 +5,6 @@ pipeline {
         TERRASCAN = '/usr/local/bin/terrascan'
         TFSEC = '/usr/local/bin/tfsec'
     }
-    tools {
-        terraform 'Terraform'
-    }
 
     stages {
         stage('Checkout') {
