@@ -17,23 +17,6 @@ pipeline {
             }
         }
 
-
-        stage('Build') {
-            steps {
-                script {
-                    if (isUnix()) {
-                        // For Linux Deployments (most servers run on Linux)
-                        sh "${MAVEN_HOME}/bin/mvn clean verify"
-                        sh "${MAVEN_HOME}/bin/mvn clean install"
-                    } else {
-                        // For Windows-based deployments (usually local testing)
-                        bat "${MAVEN_HOME}\\bin\\mvn clean verify"
-                        bat "${MAVEN_HOME}\\bin\\mvn clean install"
-                    }
-                }
-            }
-        }
-
         stage('Run Pentest Scan') {
                     steps {
                         sh 'chmod +x scan.sh'
