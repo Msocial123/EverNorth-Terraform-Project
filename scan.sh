@@ -9,7 +9,7 @@ mkdir -p logfile
 
 # Running the terrascan scan
 /usr/local/bin/terrascan scan -t aws -d . -o json > reports/terrascan_report.json
-/usr/local/bin/terrascan scan -t aws -d . -o text > reports/terrascan_report.txt
+/usr/local/bin/terrascan scan -t aws -d . -o human > reports/terrascan_report.txt
 
 #Running the TFsec scan
 /usr/local/bin/tfsec .  --format text > reports/tfsec_report.txt
