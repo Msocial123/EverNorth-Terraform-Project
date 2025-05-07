@@ -22,6 +22,9 @@ pipeline {
         stage('Publish Reports') {
             steps {
                 archiveArtifacts artifacts: 'reports/*.json', fingerprint: true
+                archiveArtifacts artifacts: 'reports/*.txt', fingerprint: true
+                archiveArtifacts artifacts: 'logfile/*.txt', fingerprint: true
+
             }
         }
     }
