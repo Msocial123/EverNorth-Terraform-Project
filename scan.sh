@@ -18,7 +18,7 @@ mkdir -p logfile
 #Logging the critical and severe errors
 awk '
   BEGIN { RS=""; FS="\n" }
-  /Severity[[:space:]]*:[[:space:]]*(HIGH|CRITICAL|SEVERE)/ { print "\n---\n" $0 }
+  /Severity[[:space:]]*:[[:space:]]*HIGH/ { print "\n---\n" $0 }
 ' reports/terrascan_report.txt > logfile/terrascan_issues.txt
 
 grep -i -E 'critical|high|severe' reports/tfsec_report.txt > logfile/tfsec_issues.txt
