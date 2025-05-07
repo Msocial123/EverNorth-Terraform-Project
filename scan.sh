@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rmdir reports
+rmdir logfile
 mkdir -p reports
 mkdir -p logfile
 
@@ -10,8 +12,8 @@ mkdir -p logfile
 /usr/local/bin/terrascan scan -t aws -d . -o text > reports/terrascan_report.txt
 
 #Running the TFsec scan
-/usr/local/bin/tfsec . --no-cache --format text > reports/tfsec_report.txt
-/usr/local/bin/tfsec . --no-cache --format json > reports/tfsec_report.json
+/usr/local/bin/tfsec .  --format text > reports/tfsec_report.txt
+/usr/local/bin/tfsec .  --format json > reports/tfsec_report.json
 
 #Logging the critical and severe errors
 grep -i -E 'critical|high|severe' reports/terrascan_report.txt > logfile/terrascan_issues.txt
